@@ -1,0 +1,2 @@
+polydog
+-DCATKIN_DEVEL_PREFIX=/home/younes/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/younes/catkin_ws/install -G Unix Makefiles
