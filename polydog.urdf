@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot name="robot_dog">
+<robot name="notspot">
 
   <!-- Define materials (optional) -->
   <material name="grey">
@@ -294,89 +294,89 @@
 
 
   <!-- Define the joints -->
-  <joint name="shoulder1" type="revolute">
+  <joint name="RL1_joint" type="revolute">
     <axis xyz="0 0 1"  />
-    <limit effort="10" lower="-1.5708" upper="+1.5708" velocity="6" />
+    <limit effort="10" lower="-3" upper="+3" velocity="6" />
     <parent link="body"/>
     <child link="case1"/>
     <origin xyz="0.084 0.122 0" rpy="1.5708 0 0"/>
   </joint>
-  <joint name="shoulder2" type="revolute">
+  <joint name="FL1_joint" type="revolute">
     <axis xyz="0 0 1"  />
-    <limit effort="10" lower="-1.5708" upper="1.5708" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="body"/>
     <child link="case2"/>
     <origin xyz="0.084 -0.122 0" rpy="1.5708 0 0"/>
   </joint>
-  <joint name="shoulder3" type="revolute">
+  <joint name="FR1_joint" type="revolute">
     <axis xyz="0 0 1"  />
-    <limit effort="10" lower="-1.5708" upper="1.5708" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="body"/>
     <child link="case3"/>
     <origin xyz="-0.084 -0.122 0" rpy="1.5708 0 3.14"/>
   </joint>
-  <joint name="shoulder4" type="revolute">
+  <joint name="RR1_joint" type="revolute">
     <axis xyz="0 0 1"  />
-    <limit effort="10" lower="-1.5708" upper="1.5708" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="body"/>
     <child link="case4"/>
     <origin xyz="-0.084 0.122 0" rpy="1.5708 0 3.14"/>
   </joint>
-  <joint name="hip4" type="revolute">
+  <joint name="RR2_joint" type="revolute">
     <axis xyz="1 0 0"  />
-    <limit effort="10" lower="-3.14" upper="0" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="case4"/>
     <child link="femur4"/>
-    <origin xyz="0.035 0 0.018" rpy="-1.5708 3.14 0"/>
+    <origin xyz="0.035 0 0.018" rpy="3.14 3.14 0"/>
   </joint>
-  <joint name="hip3" type="revolute">
+  <joint name="FR2_joint" type="revolute">
     <axis xyz="1 0 0"  />
-    <limit effort="10" lower="-3.14" upper="0" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="case3"/>
     <child link="femur3"/>
-    <origin xyz="0.035 0 -0.018" rpy="-1.5708 3.14 0"/>
+    <origin xyz="0.035 0 -0.018" rpy="3.14 3.14 0"/>
   </joint>
-  <joint name="hip2" type="revolute">
+  <joint name="FL2_joint" type="revolute">
     <axis xyz="1 0 0"  />
-    <limit effort="10" lower="-3.14" upper="0" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="case2"/>
     <child link="femur2"/>
-    <origin xyz="0.035 0 0.018" rpy="-1.5708 3.14 0"/>
+    <origin xyz="0.035 0 0.018" rpy="3.14 3.14 0"/>
   </joint>
-  <joint name="hip1" type="revolute">
+  <joint name="RL2_joint" type="revolute">
     <axis xyz="1 0 0"  />
-    <limit effort="10" lower="-3.14" upper="0" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="case1"/>
     <child link="femur1"/>
-    <origin xyz="0.035 0 -0.018" rpy="-1.5708 3.14 0"/>
+    <origin xyz="0.035 0 -0.018" rpy="-3.14 3.14 0"/>
   </joint>
-  <joint name="knee1" type="revolute">
+  <joint name="RL3_joint" type="revolute">
     <axis xyz="1 0 0"  />
-    <limit effort="10" lower="-3.6" upper="-1.5708" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="femur1"/>
     <child link="tibia1"/>
-    <origin xyz="-0.0075 0.129 0.0015" rpy="-0.75 0 0"/>
+    <origin xyz="-0.0075 0.129 0.0015" rpy="1.57 0 0"/>
   </joint>
-  <joint name="knee2" type="revolute">
+  <joint name="FL3_joint" type="revolute">
     <axis xyz="1 0 0"  />
-    <limit effort="10" lower="-3.6" upper="-1.5708" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="femur2"/>
     <child link="tibia2"/>
-    <origin xyz="-0.0075 0.129 0.0015" rpy="-0.75 0 0"/>
+    <origin xyz="-0.0075 0.129 0.0015" rpy="1.57 0 0"/>
   </joint>
-  <joint name="knee3" type="revolute">
+  <joint name="FR3_joint" type="revolute">
     <axis xyz="1 0 0"  />
-    <limit effort="10" lower="-3.6" upper="-1.5708" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="femur3"/>
     <child link="tibia3"/>
-    <origin xyz="-0.0075 0.129 0.0015" rpy="-0.75 3.14 0"/>
+    <origin xyz="-0.0075 0.129 0.0015" rpy="1.57 3.14 0"/>
   </joint>
-  <joint name="knee4" type="revolute">
+  <joint name="RR3_joint" type="revolute">
     <axis xyz="1 0 0"  />
-    <limit effort="10" lower="-3.6" upper="-1.5708" velocity="6" />
+    <limit effort="10" lower="-3" upper="3" velocity="6" />
     <parent link="femur4"/>
     <child link="tibia4"/>
-    <origin xyz="-0.0075 0.129 0.0015" rpy="-0.75 3.14 0"/>
+    <origin xyz="-0.0075 0.129 0.0015" rpy="1.57 3.14 0"/>
   </joint>
   <joint name="dummy0_to_body" type="fixed">
     <parent link="dummy0"/>
