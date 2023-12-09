@@ -1,0 +1,9 @@
+<launch>
+
+    <!-- Gazebo Simulation -->
+    <include file="$(find polydog_gazebo)/launch/simulation.launch" />
+    
+    <!-- Robot Controller -->
+    <include file="$(find polydog_controller)/launch/robot_controller.launch"/>
+
+</launch>
