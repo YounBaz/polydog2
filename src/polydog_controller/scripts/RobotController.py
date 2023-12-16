@@ -15,8 +15,8 @@ class Robot(object):
 
         self.delta_x = self.body[0] * 0.5
         self.delta_y = self.body[1] * 0.5 + self.legs[1]
-        self.x_shift_front = 0.006
-        self.x_shift_back = -0.03
+        self.x_shift_front = 0.040
+        self.x_shift_back = -0.01
         self.default_height = 0.20
 
         self.trotGaitController = TrotGaitController(self.default_stance,
@@ -42,6 +42,7 @@ class Robot(object):
                 self.state.behavior_state = BehaviorState.TROT
                 self.currentController = self.trotGaitController
                 self.currentController.pid_controller.reset()
+                self.currentController.pid_controllerZ.reset()
                 self.state.ticks = 0
             self.command.trot_event = False
 
@@ -71,7 +72,7 @@ class Robot(object):
         self.command.crawl_event = False
         self.command.stand_event = False
         self.command.rest_event = False
-            
+           
         self.currentController.updateStateCommand(msg, self.state, self.command)
 
 
@@ -80,7 +81,10 @@ class Robot(object):
         rpy_angles = tf.transformations.euler_from_quaternion([q.x,q.y,q.z,q.w])
         self.state.imu_roll = rpy_angles[0]
         self.state.imu_pitch = rpy_angles[1]
-
+        self.state.imu_yaw = rpy_angles[2]
+        #print("Roll:", rpy_angles[0])
+        #print("Pitch:", rpy_angles[1])
+        #print("Yaw:", rpy_angles[2])
     def run(self):
         return self.currentController.run(self.state, self.command)
 

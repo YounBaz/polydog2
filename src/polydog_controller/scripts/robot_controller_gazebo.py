@@ -50,8 +50,7 @@ publishers = []
 for i in range(len(command_topics)):
     publishers.append(rospy.Publisher(command_topics[i], Float64, queue_size = 10))
 
-if USE_IMU:
-    rospy.Subscriber("polydog_imu/base_link_orientation",Imu,polydog_robot.imu_orientation)
+rospy.Subscriber("/imu",Imu,polydog_robot.imu_orientation)
 rospy.Subscriber("/cmd_vel", Twist,polydog_robot.joystick_command)
 #polydog_robot.joystick_command()
 

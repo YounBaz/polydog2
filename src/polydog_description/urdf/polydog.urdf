@@ -40,7 +40,48 @@
        <inertia ixx="+0.01664" ixy="+2.083e-06" ixz="+7.089e-06" iyy="+0.01339" iyz="-1.299e-05" izz="+0.00358"/>
      </inertial>
   </link>
+  
+    <link name="depth_camera_link">
+    <visual name="depth_camera">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.0235 0.08 0.015" />
+      </geometry>
+    </visual>
+    <collision name="depth_camera">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.0235 0.08 0.015" />
+      </geometry>
+    </collision>
 
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1.0" ixy="1e-6" ixz="1e-6" iyy="1.0" iyz="1e-6" izz="1.0" />
+    </inertial>
+  </link>
+  
+    <link name="imu_sensor_link">
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.02 0.02 0.02"/>
+            </geometry>
+        </collision>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.02 0.02 0.02"/>
+            </geometry>
+        </visual>
+        <inertial>
+            <mass value="0.001" />
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <inertia ixx="0.00000015" ixy="0" ixz="0" iyy="0.00000015" iyz="0" izz="0.00000015" />
+        </inertial>
+    </link>
+    
   <!-- Define the femur link -->
   <link name="case1">
     <visual>
@@ -294,6 +335,18 @@
 
 
   <!-- Define the joints -->
+  <joint name="depth_camera_joint" type="fixed">
+    <axis xyz="0 0 0" />
+    <origin xyz="0 -0.197 0.0265" rpy="0 0 -1.57"/>
+    <parent link="body"/>
+    <child link="depth_camera_link"/>
+  </joint>
+  <joint name="imu_sensor_joint" type="fixed">
+    <axis xyz="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="body"/>
+    <child link="imu_sensor_link"/>
+  </joint>
   <joint name="RL1_joint" type="revolute">
     <axis xyz="0 0 1"  />
     <limit effort="10" lower="-3" upper="+3" velocity="6" />
@@ -441,29 +494,67 @@
   <gazebo reference="tibia4">
     <material>Gazebo/Black</material>
   </gazebo>
-  <gazebo>
-  <!-- IMU sensor -->
-  <gazebo reference="body">
-    <gravity>true</gravity>
+  <gazebo reference="imu_sensor_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  
+  <gazebo reference="depth_camera_link">
+    <sensor type="depth" name="camera">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <visualize>1</visualize>
+      <update_rate>40</update_rate>
+
+        <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+          <baseline>0.2</baseline>
+          <alwaysOn>true</alwaysOn>
+          <!-- Keep this zero, update_rate in the parent <sensor> tag
+            will control the frame rate. -->
+          <updateRate>0.0</updateRate>
+          <cameraName>camera_ir</cameraName>
+          <robotNamespace>/</robotNamespace>
+          <imageTopicName>/camera/depth/image_raw</imageTopicName>
+          <cameraInfoTopicName>/camera/depth/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+          <depthImageInfoTopicName>/camera/depth/camera_info</depthImageInfoTopicName>
+          <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+          <frameName>camera_image_link</frameName>
+          <pointCloudCutoff>0.05</pointCloudCutoff>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionK3>0</distortionK3>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>0</CxPrime>
+          <Cx>0</Cx>
+          <Cy>0</Cy>
+          <focalLength>0</focalLength>
+          <hackBaseline>0</hackBaseline>
+        </plugin>
+    </sensor>
+    <static>true</static>
+  </gazebo>
+  
+  <gazebo reference="imu_sensor_link">
+    <gravity>1</gravity>
     <sensor name="imu_sensor" type="imu">
-      <always_on>true</always_on>
+      <always_on>1</always_on>
       <update_rate>100</update_rate>
-      <visualize>true</visualize>
+      <visualize>1</visualize>
       <topic>__default_topic__</topic>
       <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
-        <topicName>polydog_imu/base_link_orientation</topicName>
-        <bodyName>imu_link</bodyName>
-        <updateRateHZ>15.0</updateRateHZ>
+        <topicName>imu</topicName>
+        <bodyName>imu_sensor_link</bodyName>
+        <updateRateHZ>10.0</updateRateHZ>
         <gaussianNoise>0.0</gaussianNoise>
         <xyzOffset>0 0 0</xyzOffset>
         <rpyOffset>0 0 0</rpyOffset>
-        <frameName>base_link</frameName>
-        <initialOrientationAsReference>false</initialOrientationAsReference>
+        <frameName>imu_sensor_link</frameName>
+        <initialOrientationAsReference>0</initialOrientationAsReference>
       </plugin>
       <pose>0 0 0 0 0 0</pose>
     </sensor>
   </gazebo>
-
+  <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/polydog_controller</robotNamespace>
     </plugin>

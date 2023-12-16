@@ -11,25 +11,26 @@ class RestController(object):
 
         # TODO: tune kp, ki and kd
         #                                     kp     ki    kd
-        self.pid_controller = PID_controller(0.75, 2.29, 0.0)
-        self.use_imu = False
-        self.use_button = True
+        self.pid_controller = PID_controller(0,0.75, 2.29)
+        self.use_imu = True
+        #self.use_button = True
         self.pid_controller.reset()
         
     def updateStateCommand(self, msg, state, command):
         # local body position
-        state.body_local_position[0] = msg.linear.z * 0.04
-        #state.body_local_position[1] = msg.axes[6] * 0.03
-        #if msg.linear.z < 0: 
-        #    state.body_local_position[2] = msg.linear.z * 0.09
-        #if msg.linear.z > 0: 
-        #    state.body_local_position[2] = msg.linear.z * 0.04
-        #if msg.linear.z == 0: 
-        #    state.body_local_position[2] = msg.linear.z 
+        #state.body_local_position[0] = msg.linear.z * 0.04
+        state.body_local_position[0] = msg.linear.x * 0.03
+        if msg.linear.z < 0: 
+            state.body_local_position[2] = msg.linear.z * 0.09
+        if msg.linear.z > 0: 
+            state.body_local_position[2] = msg.linear.z * 0.04
+        if msg.linear.z == 0: 
+            state.body_local_position[2] = msg.linear.z 
         # local body orientation
-        #state.body_local_orientation[0] = msg.angular.y * 0.4
-        #state.body_local_orientation[1] = msg.angular.x * 0.5
-        #state.body_local_orientation[2] = msg.angular.z * 0.08
+        state.body_local_orientation[0] = msg.angular.x * 0.4
+        state.body_local_orientation[1] = msg.angular.y * 0.34
+        state.body_local_orientation[2] = msg.angular.z * 0.08
+        
 
 
 
@@ -45,7 +46,7 @@ class RestController(object):
         # if self.use_imu == True, the robot tries to keep its body horizontal
         # using a PID controller
         if self.use_imu:
-            compensation = self.pid_controller.run(state.imu_roll, state.imu_pitch)
+            compensation = self.pid_controller.run(state.imu_roll, state.imu_pitch,0)
             roll_compensation = -compensation[0]
             pitch_compensation = -compensation[1]
 

@@ -23,6 +23,7 @@ class State(object):
         
         self.imu_roll = 0.
         self.imu_pitch = 0.
+        self.imu_yaw = 0.
         
         self.ticks = 0
         self.behavior_state = BehaviorState.REST

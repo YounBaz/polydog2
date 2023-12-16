@@ -3,6 +3,10 @@
     <!-- Gazebo Simulation -->
     <include file="$(find polydog_gazebo)/launch/simulation.launch" />
     
+    <!-- Rviz -->
+    <include file="$(find polydog_description)/launch/polydog_rviz.launch" />
+    
+
     <!-- Robot Controller -->
     <include file="$(find polydog_controller)/launch/robot_controller.launch"/>
 

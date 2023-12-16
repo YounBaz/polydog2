@@ -4,32 +4,36 @@ import numpy as np
 import rospy
 from GaitController import GaitController
 from PIDController import PID_controller
+from PIDControllerZ import PID_controllerZ
 from Transformations import rotxyz,rotz
 
 
 class TrotGaitController(GaitController):
     def __init__(self, default_stance, stance_time, swing_time, time_step, use_imu):
-        self.use_imu = use_imu
-        self.use_button = True
+        self.use_imu = True
+        #self.use_button = True
         self.autoRest = True
         self.trotNeeded = True
-
-        contact_phases = np.array([[1, 1, 0, 0],  # 0: Leg swing
-                                   [0, 0, 1, 1],  # 1: Moving stance forward
-                                   [0, 0, 1, 1],  
-                                   [1, 1, 0, 0]])
-
-        z_error_constant = 0.02 * 4    # This constant determines how fast we move
+        self.msg = None
+                
+                                   
+        self.contact_phases = np.array([[1, 1, 1, 0],  # 0: Leg swing
+                                   [1, 0, 1, 1],  # 1: Moving stance forward
+                                   [1, 0, 1, 1],  
+                                   [1, 1, 1, 0]])
+        
+            
+        z_error_constant = 0.02 * 10    # This constant determines how fast we move
                                        # toward the goal in the z direction
         
 
-        z_leg_lift = 0.07
+        z_leg_lift = 0.14
 
-        super().__init__(stance_time, swing_time, time_step, contact_phases, default_stance)
+        super().__init__(stance_time, swing_time, time_step, self.contact_phases, default_stance)
 
         self.max_x_velocity = 0.024 #[m/s] 
         self.max_y_velocity = 0.005 #[m/s]
-        self.max_yaw_rate = 0.16 #[rad/s]
+        self.max_yaw_rate = 1.57 #[rad/s]
 
 
         self.swingController = TrotSwingController(self.stance_ticks, self.swing_ticks, self.time_step,
@@ -41,20 +45,49 @@ class TrotGaitController(GaitController):
 
         # TODO: tune kp, ki and kd
         #                                     kp    ki    kd
-        self.pid_controller = PID_controller(0.15, 0.02, 0.002)
+        self.pid_controller = PID_controller(0.04, 0.007, 0.001)
+        self.pid_controllerZ = PID_controllerZ(0.1, 0, 0)
 
     def updateStateCommand(self, msg, state, command):
-        command.velocity[0] = msg.linear.x * self.max_x_velocity
-        command.velocity[1] = msg.linear.y * self.max_y_velocity
-        command.yaw_rate = msg.angular.z * self.max_yaw_rate
+        self.msg = msg
+        if msg.linear.x != 0 and msg.angular.z == 0 :
+            command.velocity[0] = msg.linear.x * self.max_x_velocity
+            self.contact_phases = np.array([[1, 0],  # 0: Leg swing
+                                   [0, 1],  # 1: Moving stance forward
+                                   [0, 1],  
+                                   [1, 0]])
+            print(state.imu_yaw)
+            self.pid_controller.desired_RPY_angles(0, 0, state.imu_yaw)
+            
+        if msg.linear.x != 0 and  msg.angular.z != 0:
+            command.velocity[0] = msg.linear.x * self.max_x_velocity
+            self.contact_phases = np.array([[1, 0],  # 0: Leg swing
+                                   [0, 1],  # 1: Moving stance forward
+                                   [0, 1],  
+                                   [1, 0]])
+            print(state.imu_yaw)
+            self.pid_controller.desired_RPY_angles(0, 0, state.imu_yaw+msg.angular.z)
 
-        if self.use_button:
-            self.use_imu = not self.use_imu
-            self.use_button = False
-            rospy.loginfo(f"Trot Gait Controller - Use roll/pitch compensation: {self.use_imu}")
+        if msg.linear.x == 0 :
+            command.velocity[0] = 0 * self.max_x_velocity
+        #self.pid_controller.desired_RPY_angles(0, 0, 0)
+        #command.velocity[1] = msg.linear.y * self.max_y_velocity
+        if msg.angular.z != 0 and msg.linear.x == 0:
+            command.yaw_rate = msg.angular.z * self.max_yaw_rate
+            self.contact_phases = np.array([[1, 1, 1, 0],  # 0: Leg swing
+                                   [1, 0, 1, 1],  # 1: Moving stance forward
+                                   [1, 0, 1, 1],  
+                                   [1, 1, 1, 0]])
+        if msg.angular.z == 0 :
+            command.yaw_rate = 0 * self.max_yaw_rate
+        #self.pid_controllerZ.desired_RPY_angles(msg.angular.z+state.imu_yaw)
 
-        if not self.use_button:
-            self.use_button = True
+            
+
+        
+
+
+
 
     def step(self, state, command):
         if self.autoRest:
@@ -81,12 +114,27 @@ class TrotGaitController(GaitController):
 
             # tilt compensation
             if self.use_imu:
-                compensation = self.pid_controller.run(state.imu_roll, state.imu_pitch)
-                roll_compensation = -compensation[0]
-                pitch_compensation = -compensation[1]
+                #print("IMU IS USED")
+                compensation = self.pid_controller.run(state.imu_roll, state.imu_pitch, state.imu_yaw)
+                roll_compensation = 0 #-compensation[0]
+                pitch_compensation = 0 #-compensation[1]
+                yaw_compensation = -compensation[2]
 
-                rot = rotxyz(roll_compensation,pitch_compensation,0)
-                new_foot_locations = np.matmul(rot,new_foot_locations)
+                rot = rotxyz(roll_compensation, pitch_compensation,yaw_compensation)
+                new_foot_locations = np.matmul(rot, new_foot_locations)
+                #print(state.imu_yaw)
+                #compensationz = self.pid_controllerZ.run(state.imu_yaw)
+                #yaw_compensationz = compensationz[0]
+                #if self.msg is not None:
+                    #z_value = self.msg.angular.z + state.imu_yaw
+                    #print(z_value)
+                    #if z_value - 0.087 < state.imu_yaw and z_value + 0.087 > state.imu_yaw :
+                        #command.yaw_rate = 0 * self.max_yaw_rate
+                    #elif z_value == state.imu_yaw :
+                        #command.yaw_rate = 0 * self.max_yaw_rate
+                    #else :
+                        #command.yaw_rate = yaw_compensationz * self.max_yaw_rate
+
             state.ticks += 1
             return new_foot_locations
         else:
@@ -152,10 +200,10 @@ class TrotStanceController(object):
     def position_delta(self, leg_index, state, command):
         z = state.foot_locations[2, leg_index]
 
-        step_dist_x = command.velocity[0] *\
+        step_dist_x = 4*command.velocity[0] *\
                       (float(self.phase_length)/self.swing_ticks)
 
-        step_dist_y = command.velocity[1] *\
+        step_dist_y = -command.velocity[1] *\
                       (float(self.phase_length)/self.swing_ticks)
 
         velocity = np.array([-(step_dist_x/4)/(float(self.time_step)*self.stance_ticks), 
